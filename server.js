@@ -38,17 +38,18 @@ app.get('/api/users', async (req, res) => {
 });
 
 app.post('/api/users', async (req, res) => {
-  const newName = new User({
-    name: req.body.name
-  });
+  try {
+    const newUser = new User({
+      name: req.body.name,
+      password: req.body.password // now properly included
+    });
 
-  const newPassword = new User({
-    password: req.body.password
-  });
-  await newName.save();
-  await newPassword.save();
-  res.json(newName);
-  res.join(newPassword);
+    await newUser.save();
+    res.json(newUser);
+  } catch (err) {
+    console.error('Error creating user:', err);
+    res.status(500).json({ message: 'Failed to create user' });
+  }
 });
 
 
