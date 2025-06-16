@@ -41,8 +41,14 @@ app.post('/api/users', async (req, res) => {
   const newName = new User({
     name: req.body.name
   });
+
+  const newPassword = new User({
+    password: req.body.password
+  });
   await newName.save();
+  await newPassword.save();
   res.json(newName);
+  res.join(newPassword);
 });
 
 
