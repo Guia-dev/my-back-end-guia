@@ -5,7 +5,15 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-app.use(cors({origin: 'https://runningtypegame.netlify.app'}));
+app.use(cors(
+
+  {
+    origins: 'https://runningtypegame.netlify.app',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  }
+
+));
 app.use(express.json());
 
 // Mongoose model
