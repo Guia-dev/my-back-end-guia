@@ -7,7 +7,7 @@ const path = require('path');
 const app = express();
 
 const allowedOrigins = [
-  'https://runningtypegame.netlify.app',
+  'https://note-app-guia.netlify.app',
   'http://192.168.5.188:5173'
 ];
 
