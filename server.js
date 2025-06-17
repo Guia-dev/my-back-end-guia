@@ -42,7 +42,10 @@ app.post('/api/users', async (req, res) => {
     const newUser = new User({
       name: req.body.name,
       password: req.body.password,
-      email: req.body.email// now properly included 
+      email: req.body.email,
+      bio: req.body.bio,
+      about: req.body.about,
+      friends: req.body.friends
     });
 
     await newUser.save();
