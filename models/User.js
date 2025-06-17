@@ -17,4 +17,4 @@ module.exports = mongoose.model('User', new mongoose.Schema({
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
-}));
+}, { timestamps: true }));

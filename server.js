@@ -6,9 +6,19 @@ const path = require('path');
 
 const app = express();
 
-// ✅ CORS Configuration
+const allowedOrigins = [
+  'https://runningtypegame.netlify.app',
+  'http://192.168.5.188:5173'
+];
+
 app.use(cors({
-  origin: 'https://runningtypegame.netlify.app',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT'],
   credentials: true,
 }));
