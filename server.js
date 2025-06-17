@@ -5,28 +5,25 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-app.use(cors(
 
-  {
-    origins: 'https://runningtypegame.netlify.app',
-    methods: ['GET', 'POST'],
-    credentials: true,
-  }
+// ✅ CORS Configuration
+app.use(cors({
+  origin: 'https://runningtypegame.netlify.app',
+  methods: ['GET', 'POST', 'PUT'],
+  credentials: true,
+}));
 
-));
 app.use(express.json());
 
-// Mongoose model
+// ✅ Mongoose model
 const User = require('./models/User');
 
 // ✅ Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI).then(() => {
-  console.log('Connected to MongoDB');
-}).catch(err => {
-  console.error('Error connecting to MongoDB:', err);
-});
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-// ✅ API Routes
+// ✅ GET all users
 app.get('/api/users', async (req, res) => {
   try {
     const users = await User.find();
@@ -37,6 +34,7 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+// ✅ Create new user
 app.post('/api/users', async (req, res) => {
   try {
     const newUser = new User({
@@ -45,7 +43,7 @@ app.post('/api/users', async (req, res) => {
       email: req.body.email,
       bio: req.body.bio,
       about: req.body.about,
-      friends: req.body.friends
+      friends: req.body.friends,
     });
 
     await newUser.save();
@@ -56,7 +54,7 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
-
+// ✅ Send Friend Request
 app.post('/api/users/:targetId/send-request', async (req, res) => {
   const { senderId } = req.body;
   const { targetId } = req.params;
@@ -65,12 +63,14 @@ app.post('/api/users/:targetId/send-request', async (req, res) => {
     const sender = await User.findById(senderId);
     const target = await User.findById(targetId);
 
-    if (!sender || !target) return res.status(404).json({ message: 'User not found' });
+    if (!sender || !target)
+      return res.status(404).json({ message: 'User not found' });
 
     if (
       target.friendRequests.includes(senderId) ||
       target.friends.includes(senderId)
-    ) return res.status(400).json({ message: 'Already sent or already friends' });
+    )
+      return res.status(400).json({ message: 'Already sent or already friends' });
 
     target.friendRequests.push(senderId);
     sender.sentRequests.push(targetId);
@@ -84,6 +84,7 @@ app.post('/api/users/:targetId/send-request', async (req, res) => {
   }
 });
 
+// ✅ Accept Friend Request
 app.post('/api/users/:targetId/accept-request', async (req, res) => {
   const { senderId } = req.body;
   const { targetId } = req.params;
@@ -111,6 +112,28 @@ app.post('/api/users/:targetId/accept-request', async (req, res) => {
   }
 });
 
+// ✅ Decline Friend Request
+app.post('/api/users/:targetId/decline-request', async (req, res) => {
+  const { senderId } = req.body;
+  const { targetId } = req.params;
+
+  try {
+    const target = await User.findById(targetId);
+    const sender = await User.findById(senderId);
+
+    target.friendRequests = target.friendRequests.filter(id => id.toString() !== senderId);
+    sender.sentRequests = sender.sentRequests.filter(id => id.toString() !== targetId);
+
+    await target.save();
+    await sender.save();
+
+    res.status(200).json({ message: 'Friend request declined' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ✅ Get Single User by ID with populated friends
 app.get('/api/users/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id).populate('friends', 'name email');
@@ -121,6 +144,7 @@ app.get('/api/users/:id', async (req, res) => {
   }
 });
 
+// ✅ Update Profile (email, bio, about)
 app.put('/api/users/:id/update-profile', async (req, res) => {
   const { email, bio, address, extra1, extra2 } = req.body;
 
@@ -136,7 +160,7 @@ app.put('/api/users/:id/update-profile', async (req, res) => {
           extra2
         }
       },
-      { new: true }
+      { new: true } // return updated document
     );
 
     if (!updatedUser) return res.status(404).json({ message: 'User not found' });
@@ -148,9 +172,8 @@ app.put('/api/users/:id/update-profile', async (req, res) => {
   }
 });
 
-
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`✅ Server is running on port ${PORT}`);
 });
