@@ -57,6 +57,61 @@ app.post('/api/users', async (req, res) => {
 });
 
 
+app.post('/api/users/:targetId/send-request', async (req, res) => {
+  const { senderId } = req.body;
+  const { targetId } = req.params;
+
+  try {
+    const sender = await User.findById(senderId);
+    const target = await User.findById(targetId);
+
+    if (!sender || !target) return res.status(404).json({ message: 'User not found' });
+
+    if (
+      target.friendRequests.includes(senderId) ||
+      target.friends.includes(senderId)
+    ) return res.status(400).json({ message: 'Already sent or already friends' });
+
+    target.friendRequests.push(senderId);
+    sender.sentRequests.push(targetId);
+
+    await target.save();
+    await sender.save();
+
+    res.status(200).json({ message: 'Friend request sent' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/users/:targetId/accept-request', async (req, res) => {
+  const { senderId } = req.body;
+  const { targetId } = req.params;
+
+  try {
+    const target = await User.findById(targetId); // current user
+    const sender = await User.findById(senderId); // who sent request
+
+    if (!target.friendRequests.includes(senderId)) {
+      return res.status(400).json({ message: 'No friend request from this user' });
+    }
+
+    target.friends.push(senderId);
+    sender.friends.push(targetId);
+
+    target.friendRequests = target.friendRequests.filter(id => id.toString() !== senderId);
+    sender.sentRequests = sender.sentRequests.filter(id => id.toString() !== targetId);
+
+    await target.save();
+    await sender.save();
+
+    res.status(200).json({ message: 'Friend request accepted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
