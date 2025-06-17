@@ -111,6 +111,15 @@ app.post('/api/users/:targetId/accept-request', async (req, res) => {
   }
 });
 
+app.get('/api/users/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate('friends', 'name email');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;
