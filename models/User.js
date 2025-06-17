@@ -14,6 +14,10 @@ module.exports = mongoose.model('User', new mongoose.Schema({
         address: String,
         extra1: String,
         extra2: String
-    }
+    },
+
+    friends: [{
+      name: String
+    }]
 
 }));
