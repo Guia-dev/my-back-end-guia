@@ -10,9 +10,9 @@ module.exports = mongoose.model('User', new mongoose.Schema({
     default: Date.now
   },
   about: {
-    address: String,
-    extra1: String,
-    extra2: String
+    address: { type: String, default: '' },
+    extra1: { type: String, default: '' },
+    extra2: { type: String, default: '' }
   },
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

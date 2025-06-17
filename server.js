@@ -121,6 +121,34 @@ app.get('/api/users/:id', async (req, res) => {
   }
 });
 
+app.put('/api/users/:id/update-profile', async (req, res) => {
+  const { email, bio, address, extra1, extra2 } = req.body;
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        email,
+        bio,
+        about: {
+          address,
+          extra1,
+          extra2
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) return res.status(404).json({ message: 'User not found' });
+
+    res.json({ message: 'Profile updated successfully', user: updatedUser });
+  } catch (err) {
+    console.error('Error updating user:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
