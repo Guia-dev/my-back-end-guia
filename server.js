@@ -25,8 +25,8 @@ app.use(express.json());
 
 // PubNub setup
 const pubnub = new PubNub({
-  publishKey: process.env.PUBNUB_PUB || "pub-c-867d5d85-7e27-4dde-97f7-9bfa53cc999a",
-  subscribeKey: process.env.PUBNUB_SUB || "sub-c-12bd2560-f90e-45a1-9c66-5b2a55e5bf31",
+  publishKey: process.env.PUBNUB_PUB,
+  subscribeKey: process.env.PUBNUB_SUB,
   uuid: "backend-watcher",
   storeInHistory: true
 });
