@@ -1,13 +1,12 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const path = require('path');
+// server.js
+require("dotenv").config();
+const express = require("express");
+const PubNub = require("pubnub");
+const cors = require("cors");
 
 const app = express();
-
 const allowedOrigins = [
-  'https://note-app-guia.netlify.app',
+  'https://guiaworks.netlify.app',
   'http://192.168.5.188:5173'
 ];
 
@@ -24,42 +23,51 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Mongoose model
-const Notes = require('./models/Notes');
-
-// ✅ Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI).then(() => {
-  console.log('Connected to MongoDB');
-}).catch(err => {
-  console.error('Error connecting to MongoDB:', err);
+// PubNub setup
+const pubnub = new PubNub({
+  publishKey: process.env.PUBNUB_PUB || "pub-c-867d5d85-7e27-4dde-97f7-9bfa53cc999a",
+  subscribeKey: process.env.PUBNUB_SUB || "sub-c-12bd2560-f90e-45a1-9c66-5b2a55e5bf31",
+  uuid: "backend-watcher",
+  storeInHistory: true
 });
 
-// ✅ API Routes
-app.get('/api/my-back-end/notes', async (req, res) => {
-  try {
-    const notes = await Notes.find().sort({ createdAt: 1 });
-    res.json(notes);
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Internal server error' });
+// Subscribing to the admin channel
+pubnub.subscribe({ channels: ["chat-Alex-05252007"] });
+
+pubnub.addListener({
+  message: async (event) => {
+    const { message, channel } = event;
+
+    // If it's not from admin, ignore it
+    if (message.user !== "Alex-05252007") return;
+
+    const targetClient = message?.target;
+    if (!targetClient) return;
+
+    const clientChannel = `chat-${targetClient}`;
+
+    try {
+      await pubnub.publish({
+        channel: clientChannel,
+        message: {
+          user: "Alex-05252007",
+          text: message.text,
+        },
+        storeInHistory: true
+      });
+      console.log(`✅ Relayed to ${clientChannel}: ${message.text}`);
+    } catch (err) {
+      console.error("❌ Relay failed:", err);
+    }
   }
 });
 
-app.post('/api/my-back-end/notes', async (req, res) => {
- const {content, user} = req.body;
- try{
-  const newNote = new Notes({content, user});
-  await newNote.save();
-  res.json(newNote);
- }catch(error) {
-  console.error('Error saving note:', error);
-  res.status(500).json({ message: 'Internal server error' });
- }
+// Health check
+app.get("/", (req, res) => {
+  res.send("✅ PubNub backend is running");
 });
 
-
-// ✅ Start Server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`🚀 Listening on http://localhost:${PORT}`);
 });
