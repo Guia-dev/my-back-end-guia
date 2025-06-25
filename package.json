@@ -1,9 +1,27 @@
 {
+  "name": "chat-backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "mongoose": "^8.15.2",
-    "pubnub": "^9.6.1"
-  }
+    "express": "^4.21.2",
+    "pubnub": "^7.6.3"
+  },
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Guia-dev/my-back-end-guia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Guia-dev/my-back-end-guia/issues"
+  },
+  "homepage": "https://github.com/Guia-dev/my-back-end-guia#readme"
 }
