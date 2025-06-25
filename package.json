@@ -22,5 +22,6 @@
   "bugs": {
     "url": "https://github.com/Guia-dev/my-back-end-guia/issues"
   },
-  "homepage": "https://github.com/Guia-dev/my-back-end-guia#readme"
+  "homepage": "https://github.com/Guia-dev/my-back-end-guia#readme",
+  "type": "commonjs"
 }
